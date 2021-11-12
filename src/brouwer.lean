@@ -34,9 +34,10 @@ begin
     retract_continuous := brouwer_func_continuous f h_no_fix,
     hy_sub_x := frontier_disk_subset_disk,
     retract_of_inclusion_id := begin
-      ext; rw [id],
-      { sorry, },
-      { sorry, },
+      apply funext,
+      intro x,
+      simp [r],
+      apply brouwer_func_res_eq_id f h_no_fix,
     end,
   },
 
