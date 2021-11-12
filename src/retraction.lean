@@ -12,4 +12,7 @@ structure retraction {α : Type} [topological_space α] {X Y : set α } (r : X �
 
 theorem no_retraction_theorem (f : disk → frontier disk):
   ¬ retraction f :=
-sorry
+begin
+  by_contradiction,
+  sorry,
+end
