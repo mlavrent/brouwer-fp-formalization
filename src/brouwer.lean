@@ -6,10 +6,6 @@ import .disk
 import .retraction
 
 
-
--- lemma π₁_of_S₁_iso_ℤ : fundamental_groupoid disk 0 := sorry
--- lemma π₁_of_D₂_iso_0 : fundamental_groupoid unit_circle ≅ ℤ := sorry
-
 def brouwer_func (f : disk → disk) (h_no_fix : ∀x, f x ≠ x) (a : disk) : frontier disk :=
 sorry
 

@@ -10,6 +10,9 @@ structure retraction {α : Type} [topological_space α] {X Y : set α } (r : X �
 (retract_of_inclusion_id : r ∘ (set.inclusion hy_sub_x) = id)
 
 
+-- lemma π₁_of_S₁_iso_ℤ : fundamental_groupoid disk 0 := sorry
+-- lemma π₁_of_D₂_iso_0 : fundamental_groupoid unit_circle ≅ ℤ := sorry
+
 theorem no_retraction_theorem (f : disk → frontier disk):
   ¬ retraction f :=
 begin
