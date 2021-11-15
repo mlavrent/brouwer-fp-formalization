@@ -58,5 +58,7 @@ theorem no_retraction_theorem (f : disk → frontier disk):
   ¬ retract f :=
 begin
   by_contradiction,
+
+  let φ : (fundamental_group disk ptD₂) →* (fundamental_group (frontier disk) ptfD₂) := sorry,
   sorry,
 end
