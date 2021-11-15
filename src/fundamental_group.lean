@@ -20,7 +20,7 @@ noncomputable instance fundamental_group.group {X : Type} [topological_space X] 
   p
 
 noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_space Y] {x : X} {y : Y} (f : continuous_map X Y) (hpointed : f x = y) :
-  monoid_hom (fundamental_group X x) (fundamental_group Y y) := {
+  (fundamental_group X x) →* (fundamental_group Y y) := {
   to_fun := λ(a : fundamental_group X x), sorry,
   map_one' := sorry,
   map_mul' := sorry,
