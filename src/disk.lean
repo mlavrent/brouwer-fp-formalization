@@ -1,14 +1,26 @@
 import topology.basic
 import topology.metric_space.basic
 import topology.continuous_function.basic
+import analysis.normed_space.basic
 
 def disk : set (ℝ × ℝ) := metric.closed_ball (0 : ℝ × ℝ) 1
 def circle : set (ℝ × ℝ) := metric.sphere (0 : ℝ × ℝ) 1
 
-def ptS₁ : circle := subtype.mk (1, 0) (by simp [circle, dist])
-def ptD₂ : disk := subtype.mk (1, 0) (by simp [disk, dist])
+lemma disk_frontier_eq_circle : frontier disk = circle :=
+begin
+  simp [disk, circle],
+  rw frontier_closed_ball,
+  linarith,
+end
 
--- lemma eq_pt : @coe circle (ℝ × ℝ) ptS₁ = @coe _ (ℝ × ℝ) ptD₂ :=
+def ptD₂ : disk := subtype.mk (1, 0) (by simp [disk, dist])
+def ptS₁ : circle := subtype.mk (1, 0) (by simp [circle, norm])
+def ptfD₂ : frontier disk := subtype.mk (1, 0) (by simp [disk_frontier_eq_circle, circle, norm])
+
+lemma eq_pt : @coe _ (ℝ × ℝ) _ ptS₁ = ↑ptD₂ :=
+by simp [ptD₂, ptS₁]
+
+-- TODO: add lemma for equality of all three basepoints
 
 lemma frontier_subset_closed_set {α : Type} [topological_space α] (X : set α) :
   is_closed X → frontier X ⊆ X :=
@@ -34,6 +46,3 @@ instance boundary_to_disk : has_lift (frontier disk) (disk) := {
     exact subtype.mk fd_val fd_val_in_disk,
   end
 }
-
-lemma disk_frontier_eq_circle : frontier disk ≃ circle :=
-sorry
