@@ -3,11 +3,12 @@ import topology.metric_space.basic
 import topology.continuous_function.basic
 
 def disk : set (ℝ × ℝ) := metric.closed_ball (0 : ℝ × ℝ) 1
+def circle : set (ℝ × ℝ) := metric.sphere (0 : ℝ × ℝ) 1
 
+def ptS₁ : circle := subtype.mk (1, 0) (by simp [circle, dist])
+def ptD₂ : disk := subtype.mk (1, 0) (by simp [disk, dist])
 
--- class has_scalar_mul (α : Type) [has_mul α] :=
--- (scalar_mul : α → α × α → α × α)
-
+-- lemma eq_pt : @coe circle (ℝ × ℝ) ptS₁ = @coe _ (ℝ × ℝ) ptD₂ :=
 
 lemma frontier_subset_closed_set {α : Type} [topological_space α] (X : set α) :
   is_closed X → frontier X ⊆ X :=
@@ -34,4 +35,5 @@ instance boundary_to_disk : has_lift (frontier disk) (disk) := {
   end
 }
 
-
+lemma disk_frontier_eq_circle : frontier disk ≃ circle :=
+sorry
