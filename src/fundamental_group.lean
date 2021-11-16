@@ -19,8 +19,16 @@ noncomputable instance fundamental_group.group {X : Type} [topological_space X] 
   (@category_theory.groupoid.to_category (fundamental_groupoid X) _)
   p
 
+noncomputable instance fundamental_group.mul_one_class {X : Type} [topological_space X] (p : X) : mul_one_class (fundamental_group X p) := {
+  one := fundamental_group.group.one,
+  mul := fundamental_group.group.mul,
+  one_mul := fundamental_group.group.one_mul,
+  mul_one := fundamental_group.group.mul_one,
+}
+
 -- example : ∀(x : fundamental_group ℤ 1), x := sorry
 
+-- TODO: figure out composition below
 noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_space Y] {x : X} {y : Y} (f : continuous_map X Y) (hpointed : f x = y) :
   (fundamental_group X x) →* (fundamental_group Y y) := {
   to_fun := λi, {

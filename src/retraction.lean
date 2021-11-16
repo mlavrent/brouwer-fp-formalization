@@ -17,8 +17,8 @@ structure retract {α : Type} [topological_space α] {X Y : set α } (r : X → 
 
 #check category_theory.Aut ℝ
 
-def π₁_S₁ := fundamental_group circle ptS₁
-def π₁_D₂ := fundamental_group disk ptD₂
+def π₁_S₁ : Type := fundamental_group circle ptS₁
+def π₁_D₂ : Type := fundamental_group disk ptD₂
 
 lemma π₁_S₁_iso_ℤ : fundamental_group circle ptS₁ ≅ ℤ := sorry
 lemma π₁_D₂_iso_0 : fundamental_group disk ptD₂ ≅ unit := sorry
