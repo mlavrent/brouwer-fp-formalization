@@ -29,7 +29,7 @@ noncomputable instance fundamental_group.mul_one_class {X : Type} [topological_s
 -- example : ∀(x : fundamental_group ℤ 1), x := sorry
 
 -- TODO: figure out composition below
-noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_space Y] {x : X} {y : Y} (f : continuous_map X Y) (hpointed : f x = y) :
+noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_space Y] {x : X} {y : Y} (f : C(X, Y)) (hpointed : f x = y) :
   (fundamental_group X x) →* (fundamental_group Y y) := {
   to_fun := λi, {
     hom := f ∘ i.hom,
@@ -40,3 +40,7 @@ noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_sp
   map_one' := sorry,
   map_mul' := sorry,
 }
+
+lemma surj_hom_of_surj {X Y : Type} [topological_space X] [topological_space Y] {x : X} {y : Y} (f : C(X, Y)) (hpointed : f x = y) :
+  function.surjective f → function.surjective (induced_hom f hpointed) :=
+sorry

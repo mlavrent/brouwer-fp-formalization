@@ -6,14 +6,14 @@ import .disk
 import .retraction
 
 
-def brouwer_func (f : disk → disk) (h_no_fix : ∀x, f x ≠ x) (a : disk) : frontier disk :=
+def brouwer_func (f : disk → disk) (h_no_fix : ∀x, f x ≠ x) : C(disk, frontier disk) :=
 sorry
 
-lemma brouwer_func_continuous (f : disk → disk) (hf_cont : continuous f) (h_no_fix : ∀x, f x ≠ x) :
+lemma brouwer_func_continuous (f : C(disk, disk)) (h_no_fix : ∀x, f x ≠ x) :
   continuous (brouwer_func f h_no_fix) :=
 sorry
 
-lemma brouwer_func_circle_eq_id (f : disk → disk) (hf_cont : continuous f) (h_no_fix : ∀x, f x ≠ x) :
+lemma brouwer_func_circle_eq_id (f : C(disk, disk)) (h_no_fix : ∀x, f x ≠ x) :
   ∀(x : frontier disk), brouwer_func f h_no_fix ↑x = x :=
 begin
   intro x,
@@ -22,7 +22,7 @@ begin
 end
 
 
-theorem brouwer_fixed_point (f : disk → disk) (hf_cont : continuous f) :
+theorem brouwer_fixed_point (f : C(disk, disk)) :
   ∃x, f x = x :=
 begin
   by_contradiction,
@@ -35,13 +35,12 @@ begin
     brouwer_func f h_no_fix,
 
   have hf_retract : retract r := {
-    retract_continuous := brouwer_func_continuous f hf_cont h_no_fix,
+    retract_continuous := brouwer_func_continuous f h_no_fix,
     hy_sub_x := frontier_disk_subset_disk,
-    retract_of_inclusion_id := begin
-      apply funext,
+    inclusion_right_inv := begin
       intro x,
       simp [r],
-      apply brouwer_func_circle_eq_id f hf_cont h_no_fix,
+      apply brouwer_func_circle_eq_id f h_no_fix,
     end,
   },
 

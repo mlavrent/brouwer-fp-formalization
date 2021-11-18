@@ -10,18 +10,28 @@ import category_theory.category.basic
 import .disk
 import .fundamental_group
 
-structure retract {α : Type} [topological_space α] {X Y : set α } (r : X → Y) : Prop :=
+structure retract {α : Type} [topological_space α] {X Y : set α} (r : X → Y) : Prop :=
 (retract_continuous : continuous r)
 (hy_sub_x : Y ⊆ X)
-(retract_of_inclusion_id : r ∘ (set.inclusion hy_sub_x) = id)
+(inclusion_right_inv : function.right_inverse (set.inclusion hy_sub_x) r)
 
-#check category_theory.Aut ℝ
+lemma surjective_of_retract {α : Type} [topological_space α] {X Y : set α} (r : X → Y) :
+  retract r → function.surjective r :=
+begin
+  intro hret,
+  apply function.has_right_inverse.surjective,
+  apply exists.intro (set.inclusion hret.hy_sub_x),
+  exact hret.inclusion_right_inv,
+end
 
 def π₁_S₁ : Type := fundamental_group circle ptS₁
 def π₁_D₂ : Type := fundamental_group disk ptD₂
 
 lemma π₁_S₁_iso_ℤ : fundamental_group circle ptS₁ ≅ ℤ := sorry
 lemma π₁_D₂_iso_0 : fundamental_group disk ptD₂ ≅ unit := sorry
+
+instance mul_one_class.π₁_D₂ : mul_one_class π₁_D₂ := sorry
+instance mul_one_class.π₁_S₁ : mul_one_class π₁_S₁ := sorry
 
 instance unit.has_zero : has_zero unit := {
   zero := unit.star,
@@ -37,28 +47,25 @@ instance unit.add_group : add_group unit := {
   add_left_neg := by cc,
 }
 
-
-lemma no_surj_hom_0toℤ (φ : unit →+ ℤ) :
-  ¬ function.surjective ⇑φ :=
-begin
-  simp [function.surjective],
-  apply exists.intro (1 : ℤ),
-  intros u heq,
-  cases u,
-  sorry,
-end
-
 lemma no_surj_hom_π₁D₂_to_π₁S₁ (φ : π₁_D₂ →* π₁_S₁) :
-  ¬ function.surjective ⇑φ :=
+  ¬ function.surjective φ :=
 begin
+  by_contradiction,
+  let φ' := π₁_D₂_iso_0.inv ≫ φ ≫ π₁_S₁_iso_ℤ.hom,
+  have hφ'_epi : category_theory.epi φ' := sorry,
   sorry,
+  -- not_surjective_fintype_infinite φ
 end
 
-theorem no_retraction_theorem (f : disk → frontier disk):
+theorem no_retraction_theorem (f : C(disk, frontier disk)) :
   ¬ retract f :=
 begin
   by_contradiction,
 
-  let φ : (fundamental_group disk ptD₂) →* (fundamental_group (frontier disk) ptfD₂) := sorry,
+  have hpointed : f ptD₂ = ptfD₂ := sorry,
+
+  let φ : (fundamental_group disk ptD₂) →* (fundamental_group (frontier disk) ptfD₂) :=
+    induced_hom f hpointed,
+  have hsurj : function.surjective φ := surj_hom_of_surj f hpointed (surjective_of_retract f h),
   sorry,
 end
