@@ -61,11 +61,12 @@ theorem no_retraction_theorem (f : C(disk, frontier disk)) :
   ¬ retract f :=
 begin
   by_contradiction,
-
   have hpointed : f ptD₂ = ptfD₂ := sorry,
 
   let φ : (fundamental_group disk ptD₂) →* (fundamental_group (frontier disk) ptfD₂) :=
     induced_hom f hpointed,
-  have hsurj : function.surjective φ := surj_hom_of_surj f hpointed (surjective_of_retract f h),
-  sorry,
+  have h_surj : function.surjective φ := surj_hom_of_surj f hpointed (surjective_of_retract f h),
+  
+  have hnot_surj : ¬ function.surjective φ := sorry,
+  contradiction,
 end
