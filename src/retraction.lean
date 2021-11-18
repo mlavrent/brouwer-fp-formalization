@@ -27,7 +27,12 @@ end
 def π₁_S₁ : Type := fundamental_group circle ptS₁
 def π₁_D₂ : Type := fundamental_group disk ptD₂
 
-lemma π₁_S₁_iso_ℤ : fundamental_group circle ptS₁ ≅ ℤ := sorry
+lemma π₁_S₁_iso_ℤ : fundamental_group circle ptS₁ ≅ ℤ :=
+category_theory.iso.mk
+  (λγ, sorry)
+  (λn, sorry)
+  sorry
+  sorry
 lemma π₁_D₂_iso_0 : fundamental_group disk ptD₂ ≅ unit := sorry
 
 instance mul_one_class.π₁_D₂ : mul_one_class π₁_D₂ := sorry
@@ -66,7 +71,7 @@ begin
   let φ : (fundamental_group disk ptD₂) →* (fundamental_group (frontier disk) ptfD₂) :=
     induced_hom f hpointed,
   have h_surj : function.surjective φ := surj_hom_of_surj f hpointed (surjective_of_retract f h),
-  
+
   have hnot_surj : ¬ function.surjective φ := sorry,
   contradiction,
 end

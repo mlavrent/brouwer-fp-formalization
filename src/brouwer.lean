@@ -6,41 +6,50 @@ import .disk
 import .retraction
 
 
-def brouwer_func (f : disk → disk) (h_no_fix : ∀x, f x ≠ x) : C(disk, frontier disk) :=
+def ray_fn (f : disk → disk) (h_no_fix : ∀x, f x ≠ x) : C(disk, frontier disk) :=
 sorry
 
-lemma brouwer_func_continuous (f : C(disk, disk)) (h_no_fix : ∀x, f x ≠ x) :
-  continuous (brouwer_func f h_no_fix) :=
+lemma ray_fn_continuous (f : C(disk, disk)) (h_no_fix : ∀x, f x ≠ x) :
+  continuous (ray_fn f h_no_fix) :=
 sorry
 
-lemma brouwer_func_circle_eq_id (f : C(disk, disk)) (h_no_fix : ∀x, f x ≠ x) :
-  ∀(x : frontier disk), brouwer_func f h_no_fix ↑x = x :=
+lemma ray_fn_fdisk_eq_id (f : C(disk, disk)) (h_no_fix : ∀x, f x ≠ x) :
+  (ray_fn f h_no_fix) ∘ (set.inclusion frontier_disk_subset_disk) = id :=
 begin
+  apply funext,
   intro x,
-  simp [brouwer_func],
+  simp [ray_fn],
   sorry,
 end
+
+lemma ray_fn_fdisk_eq_id₂ (f : C(disk, disk)) (h_no_fix : ∀x, f x ≠ x) :
+  ∀x, (ray_fn f h_no_fix) (set.inclusion frontier_disk_subset_disk x) = x :=
+begin
+  intro x,
+  rw ← function.comp_app (ray_fn f h_no_fix) _ _,
+  rw ray_fn_fdisk_eq_id,
+  exact id.def x,
+end
+
+
 
 
 theorem brouwer_fixed_point (f : C(disk, disk)) :
   ∃x, f x = x :=
 begin
   by_contradiction,
-  have h_no_fix : ∀x, f x ≠ x := begin
-    rw ← not_exists,
-    assumption,
-   end,
+  rw not_exists at h,
 
   let r : disk → frontier disk :=
-    brouwer_func f h_no_fix,
+    ray_fn f h,
 
   have hf_retract : retract r := {
-    retract_continuous := brouwer_func_continuous f h_no_fix,
+    retract_continuous := ray_fn_continuous f h,
     hy_sub_x := frontier_disk_subset_disk,
     inclusion_right_inv := begin
-      intro x,
       simp [r],
-      apply brouwer_func_circle_eq_id f h_no_fix,
+      intro x,
+      apply ray_fn_fdisk_eq_id₂,
     end,
   },
 

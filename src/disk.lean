@@ -17,10 +17,7 @@ def ptD₂ : disk := subtype.mk (1, 0) (by simp [disk, dist])
 def ptS₁ : circle := subtype.mk (1, 0) (by simp [circle, norm])
 def ptfD₂ : frontier disk := subtype.mk (1, 0) (by simp [disk_frontier_eq_circle, circle, norm])
 
-lemma eq_pt : @coe _ (ℝ × ℝ) _ ptS₁ = ↑ptD₂ :=
-by simp [ptD₂, ptS₁]
-
--- TODO: add lemma for equality of all three basepoints
+-- TODO: add lemma for equality of all three basepoints (via inclusion map)
 
 lemma frontier_subset_closed_set {α : Type} [topological_space α] (X : set α) :
   is_closed X → frontier X ⊆ X :=
