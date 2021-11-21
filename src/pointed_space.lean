@@ -12,6 +12,9 @@ structure pointed_continuous_map (X Y : Type)
 
 notation `Cp(` X `, ` Y `)` := pointed_continuous_map X Y
 
+instance has_coe_to_fun.pointed_continuous_map {X Y : Type} [pointed_space X] [pointed_space Y] :
+  has_coe_to_fun Cp(X, Y) (λ _, X → Y) :=
+⟨λf, pointed_continuous_map.to_continuous_map f⟩
 
 instance pointed_space.subspace {α : Type} [pointed_space α] (X : set α) (h_basepoint_in_X : (pointed_space.basepoint ∈ X)) :
   pointed_space X := {
