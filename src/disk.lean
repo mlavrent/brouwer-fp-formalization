@@ -1,10 +1,23 @@
 import topology.basic
 import topology.metric_space.basic
 import topology.continuous_function.basic
+import topology.homotopy.fundamental_groupoid
 import analysis.normed_space.basic
+
+import .pointed_space
 
 def disk : set (ℝ × ℝ) := metric.closed_ball (0 : ℝ × ℝ) 1
 def circle : set (ℝ × ℝ) := metric.sphere (0 : ℝ × ℝ) 1
+
+noncomputable instance pointed_space.disk : pointed_space disk := {
+  basepoint := subtype.mk (0, 1) (by simp [disk, norm])
+}
+
+noncomputable instance pointed_space.circle : pointed_space circle := {
+  basepoint := subtype.mk (0, 1) (by simp [circle, norm])
+}
+
+
 
 lemma disk_frontier_eq_circle : frontier disk = circle :=
 begin
@@ -12,12 +25,6 @@ begin
   rw frontier_closed_ball,
   linarith,
 end
-
-def ptD₂ : disk := subtype.mk (1, 0) (by simp [disk, dist])
-def ptS₁ : circle := subtype.mk (1, 0) (by simp [circle, norm])
-def ptfD₂ : frontier disk := subtype.mk (1, 0) (by simp [disk_frontier_eq_circle, circle, norm])
-
--- TODO: add lemma for equality of all three basepoints (via inclusion map)
 
 lemma frontier_subset_closed_set {α : Type} [topological_space α] (X : set α) :
   is_closed X → frontier X ⊆ X :=
