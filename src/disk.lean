@@ -10,14 +10,12 @@ def disk : set (ℝ × ℝ) := metric.closed_ball (0 : ℝ × ℝ) 1
 def circle : set (ℝ × ℝ) := metric.sphere (0 : ℝ × ℝ) 1
 
 noncomputable instance pointed_space.disk : pointed_space disk := {
-  basepoint := subtype.mk (0, 1) (by simp [disk, norm])
+  basepoint := subtype.mk (0, 1) (by simp [disk, norm]),
 }
 
 noncomputable instance pointed_space.circle : pointed_space circle := {
-  basepoint := subtype.mk (0, 1) (by simp [circle, norm])
+  basepoint := subtype.mk (0, 1) (by simp [circle, norm]),
 }
-
-
 
 lemma disk_frontier_eq_circle : frontier disk = circle :=
 begin
