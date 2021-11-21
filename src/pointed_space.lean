@@ -13,7 +13,12 @@ structure pointed_continuous_map (X Y : Type)
 notation `Cp(` X `, ` Y `)` := pointed_continuous_map X Y
 
 
-instance pointed_space.subet {α : Type} [pointed_space α] (X : set α) (h_basepoint_in_X : (pointed_space.basepoint ∈ X)) :
+instance pointed_space.subspace {α : Type} [pointed_space α] (X : set α) (h_basepoint_in_X : (pointed_space.basepoint ∈ X)) :
   pointed_space X := {
-  basepoint := subtype.mk pointed_space.basepoint (by simp [h_basepoint_in_X]),
+  basepoint := subtype.mk pointed_space.basepoint (by simp [h_basepoint_in_X])
+}
+
+instance pointed_space.superspace {α : Type} [topological_space α] (X : set α) [pointed_space X] :
+  pointed_space α := {
+  basepoint := (@pointed_space.basepoint X _)
 }
