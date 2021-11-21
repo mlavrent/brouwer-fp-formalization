@@ -17,7 +17,7 @@ noncomputable instance pointed_space.circle : pointed_space circle := {
   basepoint := subtype.mk (0, 1) (by simp [circle, norm]),
 }
 
-lemma disk_frontier_eq_circle : frontier disk = circle :=
+lemma frontier_disk_eq_circle : frontier disk = circle :=
 begin
   simp [disk, circle],
   rw frontier_closed_ball,
@@ -39,7 +39,7 @@ lemma frontier_disk_subset_disk :
   frontier disk ⊆ disk :=
 frontier_subset_closed_set disk metric.is_closed_ball
 
-instance boundary_to_disk : has_lift (frontier disk) (disk) := {
+instance has_lift.frontier_disk : has_lift (frontier disk) (disk) := {
   lift := begin
     intro fd,
     cases fd,
@@ -47,4 +47,8 @@ instance boundary_to_disk : has_lift (frontier disk) (disk) := {
       frontier_disk_subset_disk fd_property,
     exact subtype.mk fd_val fd_val_in_disk,
   end
+}
+
+noncomputable instance pointed_space.frontier_disk : pointed_space (frontier disk) := {
+  basepoint := subtype.mk (0, 1) (by simp [frontier_disk_eq_circle, circle, norm]),
 }

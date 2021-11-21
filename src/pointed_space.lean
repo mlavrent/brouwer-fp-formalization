@@ -17,8 +17,3 @@ instance pointed_space.subspace {α : Type} [pointed_space α] (X : set α) (h_b
   pointed_space X := {
   basepoint := subtype.mk pointed_space.basepoint (by simp [h_basepoint_in_X])
 }
-
-instance pointed_space.superspace {α : Type} [topological_space α] (X : set α) [pointed_space X] :
-  pointed_space α := {
-  basepoint := (@pointed_space.basepoint X _)
-}
