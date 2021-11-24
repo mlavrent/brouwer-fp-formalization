@@ -12,48 +12,52 @@ import .pointed_space
 
 notation `↾` f : 200 := category_theory.as_hom f
 
-def fundamental_group (X : Type) [pointed_space X] : Type :=
+def fundamental_group {X : Type} [topological_space X] (Xp : pointed_space X) : Type :=
 @category_theory.Aut
   X
   (@category_theory.groupoid.to_category (fundamental_groupoid X) _)
-  pointed_space.basepoint
+  Xp.basepoint
 
-noncomputable instance fundamental_group.group {X : Type} [pointed_space X] : group (fundamental_group X) :=
+noncomputable instance fundamental_group.group {X : Type} [topological_space X] {Xp : pointed_space X} :
+   group (fundamental_group Xp) :=
 @category_theory.Aut.group
   X
   (@category_theory.groupoid.to_category (fundamental_groupoid X) _)
-  pointed_space.basepoint
+  Xp.basepoint
 
-noncomputable instance fundamental_group.mul_one_class {X : Type} [pointed_space X] : mul_one_class (fundamental_group X) := {
+noncomputable instance fundamental_group.mul_one_class {X : Type} [topological_space X] {Xp : pointed_space X} :
+  mul_one_class (fundamental_group Xp) := {
   one := fundamental_group.group.one,
   mul := fundamental_group.group.mul,
   one_mul := fundamental_group.group.one_mul,
   mul_one := fundamental_group.group.mul_one,
 }
 
-def loop (X : Type) [pointed_space X] : Type :=
-path (@pointed_space.basepoint X) (@pointed_space.basepoint X)
+def loop {X : Type} [topological_space X] (Xp : pointed_space X) : Type :=
+path Xp.basepoint Xp.basepoint
 
 noncomputable def conn_path {X : Type} [topological_space X] [path_connected_space X] (p q : X) :
   @quiver.hom (fundamental_groupoid X) _ p q :=
 @quotient.mk (path p q) (path.homotopic.setoid p q) (joined.some_path (path_connected_space.joined p q))
 
-theorem iso_fg_of_path_conn {X : Type} [topological_space X] [path_connected_space X] (ps₁ : pointed_space X) (ps₂ : pointed_space X):
-  (@fundamental_group X ps₁) ≅ (@fundamental_group X ps₂) := {
+noncomputable theorem iso_fg_of_path_conn {X : Type} [topological_space X] [path_connected_space X]
+  (Xp : pointed_space X) (Xq : pointed_space X) :
+  (fundamental_group Xp) ≅ (fundamental_group Xq) := {
   hom := λγ, category_theory.iso.mk
-    ((conn_path (@pointed_space.basepoint ps₁) (@pointed_space.basepoint ps₂)) ≫ γ.hom ≫ (conn_path (@pointed_space.basepoint ps₂) (@pointed_space.basepoint ps₁)))
-    ((conn_path (@pointed_space.basepoint ps₁) (@pointed_space.basepoint ps₂)) ≫ γ.inv ≫ (conn_path (@pointed_space.basepoint ps₁) (@pointed_space.basepoint ps₂)))
+    sorry
+    sorry
     sorry
     sorry, -- do (ps₁ -> ps₂) * γ * (ps₂ -> ps₁)
   inv := λγ, sorry, -- do opposite of above
 }
 
 -- TODO: figure out composition below
-noncomputable def induced_hom {X Y : Type} [pointed_space X] [pointed_space Y] (f : Cp(X, Y)) :
-  (fundamental_group X) →* (fundamental_group Y) := {
+noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_space Y]
+  {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
+  (fundamental_group Xp) →* (fundamental_group Yq) := {
   to_fun := λγ, {
-    hom := @category_theory.category_struct.comp _ _ _ _ _ γ.hom f,
-    inv := ↾f ≫ γ.inv,
+    hom := sorry,
+    inv := sorry,
     hom_inv_id' := sorry,
     inv_hom_id' := sorry,
   },
@@ -61,7 +65,8 @@ noncomputable def induced_hom {X Y : Type} [pointed_space X] [pointed_space Y] (
   map_mul' := sorry,
 }
 
-lemma surj_hom_of_surj {X Y : Type} [pointed_space X] [pointed_space Y] (f : Cp(X, Y)) :
+lemma surj_hom_of_surj {X Y : Type} [topological_space X] [topological_space Y]
+  {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
   function.surjective f → function.surjective (induced_hom f) :=
 sorry
 

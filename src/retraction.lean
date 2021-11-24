@@ -6,21 +6,23 @@ import category_theory.endomorphism
 import category_theory.groupoid
 import algebra.category.Group.basic
 import category_theory.category.basic
+import data.complex.exponential
+import analysis.special_functions.trigonometric.basic
 
 import .disk
 import .fundamental_group
 
 
 /--
-A retract is a continuous map r from a space to a subset of itself where
+A retraction is a continuous map r from a space to a subset of itself where
 r restricted to that subset is the identity.
 -/
-structure retract {α : Type} [topological_space α] {X Y : set α} (r : C(X, Y)) : Prop :=
+structure retraction {α : Type} [topological_space α] {X Y : set α} (r : C(X, Y)) : Prop :=
 (hy_sub_x : Y ⊆ X)
 (inclusion_right_inv : function.right_inverse (set.inclusion hy_sub_x) r)
 
-lemma surjective_of_retract {α : Type} [topological_space α] {X Y : set α} (r : X → Y) :
-  retract r → function.surjective r :=
+lemma surjective_of_retract {α : Type} [topological_space α] {X Y : set α} (r : C(X, Y)) :
+  retraction r → function.surjective r :=
 begin
   intro hret,
   apply function.has_right_inverse.surjective,
@@ -28,18 +30,40 @@ begin
   exact hret.inclusion_right_inv,
 end
 
-lemma fg_circle_iso_int : fundamental_group circle ≅ ℤ :=
+noncomputable def nth_winding_loop (n : ℤ) : path (1, 0) (1, 0) :=
+path.mk
+  (continuous_map.mk
+    (λt, (real.cos (2 * real.pi * n * t), real.sin (2 * real.pi * n * t)))
+    (by continuity))
+  (by simp)
+  begin
+    simp,
+    rw mul_comm _ ↑n,
+    apply and.intro,
+    apply real.cos_int_mul_two_pi,
+    rw ← zero_add (↑n * (2 * real.pi)),
+    rw real.sin_add_int_mul_two_pi 0 n,
+    simp,
+  end
+
+noncomputable lemma fg_circle_iso_int : fundamental_group circle ≅ ℤ :=
 category_theory.iso.mk
   (λγ, sorry)
-  (λn, sorry)
+  (λn, category_theory.iso.mk ⟦nth_winding_loop n⟧ ⟦nth_winding_loop (-n)⟧ _)
   sorry
   sorry
-lemma fg_disk_iso_0 : fundamental_group disk ≅ unit :=
+
+noncomputable lemma fg_disk_iso_0 : fundamental_group disk ≅ unit :=
 category_theory.iso.mk
   (λγ, 0)
-  (λn, sorry)
-  sorry
-  sorry
+  (λn, 1)
+  (begin
+    ext,
+    simp,
+    -- apply quotient.sound,
+    sorry,
+  end)
+  (by {funext, simp})
 
 instance mul_one_class.π₁_D₂ : mul_one_class (fundamental_group disk) := sorry
 instance mul_one_class.π₁_S₁ : mul_one_class (fundamental_group circle) := sorry
@@ -62,7 +86,7 @@ lemma no_surj_hom_π₁D₂_to_π₁S₁ (φ : (fundamental_group disk) →* (fu
   ¬ function.surjective φ :=
 begin
   by_contradiction,
-  let ψ := π₁_D₂_iso_0.inv ≫ φ ≫ π₁_S₁_iso_ℤ.hom,
+  let ψ := fg_disk_iso_0.inv ≫ φ ≫ fg_circle_iso_int.hom,
 
   have hψ_epi : category_theory.epi ψ := begin
     -- apply @category_theory.epi_of_epi_fac _ _ _ _ _ π₁_D₂_iso_0.inv (φ ≫ π₁_S₁_iso_ℤ.hom) ψ _,
@@ -77,17 +101,16 @@ begin
 end
 
 /--
-The 2-dimensional no retraction theorem asserts that there is no retract
+The 2-dimensional no retraction theorem asserts that there is no retraction
 from the disk D² to its boundary circle S¹.
 -/
 theorem no_retraction_theorem (f : C(disk, frontier disk)) :
-  ¬ retract f :=
+  ¬ retraction f :=
 begin
   by_contradiction,
 
   let φ : (fundamental_group disk) →* (fundamental_group (frontier disk)) :=
     induced_hom f,
-  -- rw disk_frontier_eq_circle at φ,
 
   have h_surj : function.surjective φ :=
     @surj_hom_of_surj f (surjective_of_retract f h),
