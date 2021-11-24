@@ -1,22 +1,18 @@
 import topology.basic
 import topology.continuous_function.basic
 
-@[class]
-structure pointed_space (X : Type) extends topological_space X : Type :=
+structure pointed_space (X : Type) [topological_space X] : Type :=
+(to_topological_space : topological_space X)
 (basepoint : X)
 
-structure pointed_continuous_map (X Y : Type)
-  [pointed_space X] [pointed_space Y]
+structure pointed_continuous_map {X Y : Type} [topological_space X] [topological_space Y]
+  (Xp : pointed_space X) (Yp : pointed_space Y)
   extends continuous_map X Y : Type :=
-(pointed_map : to_fun (@pointed_space.basepoint X _) = @pointed_space.basepoint Y _)
+(pointed_map : to_fun Xp.basepoint = Yp.basepoint)
 
-notation `Cp(` X `, ` Y `)` := pointed_continuous_map X Y
+notation `Cp(` Xp `, ` Yp `)` := pointed_continuous_map Xp Yp
 
-instance has_coe_to_fun.pointed_continuous_map {X Y : Type} [pointed_space X] [pointed_space Y] :
-  has_coe_to_fun Cp(X, Y) (λ _, X → Y) :=
+instance has_coe_to_fun.pointed_continuous_map {X Y : Type} [topological_space X] [topological_space Y]
+  (Xp : pointed_space X) (Yp : pointed_space Y) :
+  has_coe_to_fun Cp(Xp, Yp) (λ _, X → Y) :=
 ⟨λf, pointed_continuous_map.to_continuous_map f⟩
-
-instance pointed_space.subspace {α : Type} [pointed_space α] (X : set α) (h_basepoint_in_X : (pointed_space.basepoint ∈ X)) :
-  pointed_space X := {
-  basepoint := subtype.mk pointed_space.basepoint (by simp [h_basepoint_in_X])
-}
