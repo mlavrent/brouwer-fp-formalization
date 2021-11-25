@@ -9,13 +9,15 @@ import .pointed_space
 def disk : set (ℝ × ℝ) := metric.closed_ball (0 : ℝ × ℝ) 1
 def circle : set (ℝ × ℝ) := metric.sphere (0 : ℝ × ℝ) 1
 
-noncomputable instance pointed_space.disk : pointed_space disk := {
-  basepoint := subtype.mk (0, 1) (by simp [disk, norm]),
-}
+noncomputable def disk.pointed_space : pointed_space disk :=
+pointed_space.mk
+  subtype.topological_space
+  (subtype.mk (1, 0) (by simp [disk, norm]))
 
-noncomputable instance pointed_space.circle : pointed_space circle := {
-  basepoint := subtype.mk (0, 1) (by simp [circle, norm]),
-}
+noncomputable def circle.pointed_space : pointed_space circle :=
+pointed_space.mk
+  subtype.topological_space
+  (subtype.mk (1, 0) (by simp [circle, norm]))
 
 lemma frontier_disk_eq_circle : frontier disk = circle :=
 begin
@@ -47,8 +49,4 @@ instance has_lift.frontier_disk : has_lift (frontier disk) (disk) := {
       frontier_disk_subset_disk fd_property,
     exact subtype.mk fd_val fd_val_in_disk,
   end
-}
-
-noncomputable instance pointed_space.frontier_disk : pointed_space (frontier disk) := {
-  basepoint := subtype.mk (0, 1) (by simp [frontier_disk_eq_circle, circle, norm]),
 }
