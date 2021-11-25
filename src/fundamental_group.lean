@@ -10,7 +10,7 @@ import category_theory.category.basic
 import category_theory.types
 import .pointed_space
 
-notation `↾` f : 200 := category_theory.as_hom f
+-- notation `↾` f : 200 := category_theory.as_hom f
 
 def fundamental_group {X : Type} [topological_space X] (Xp : pointed_space X) : Type :=
 @category_theory.Aut
@@ -44,11 +44,15 @@ noncomputable theorem iso_fg_of_path_conn {X : Type} [topological_space X] [path
   (Xp : pointed_space X) (Xq : pointed_space X) :
   (fundamental_group Xp) ≅ (fundamental_group Xq) := {
   hom := λγ, category_theory.iso.mk
+    ((conn_path Xq.basepoint Xp.basepoint) ≫ γ ≫ (conn_path Xp.basepoint Xq.basepoint))
+    ((conn_path Xq.basepoint Xp.basepoint) ≫ γ⁻¹ ≫ (conn_path Xp.basepoint Xq.basepoint))
     sorry
+    sorry,
+  inv := λγ, category_theory.iso.mk
+    ((conn_path Xp.basepoint Xq.basepoint) ≫ γ ≫ (conn_path Xq.basepoint Xp.basepoint))
+    ((conn_path Xp.basepoint Xq.basepoint) ≫ γ ≫ (conn_path Xq.basepoint Xp.basepoint))
     sorry
-    sorry
-    sorry, -- do (ps₁ -> ps₂) * γ * (ps₂ -> ps₁)
-  inv := λγ, sorry, -- do opposite of above
+    sorry,
 }
 
 -- TODO: figure out composition below

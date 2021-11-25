@@ -46,14 +46,14 @@ path.mk
     simp,
   end
 
-noncomputable lemma fg_circle_iso_int : fundamental_group circle ≅ ℤ :=
+noncomputable lemma fg_circle_iso_int : fundamental_group circle.pointed_space ≅ ℤ :=
 category_theory.iso.mk
   (λγ, sorry)
   (λn, category_theory.iso.mk ⟦nth_winding_loop n⟧ ⟦nth_winding_loop (-n)⟧ _)
   sorry
   sorry
 
-noncomputable lemma fg_disk_iso_0 : fundamental_group disk ≅ unit :=
+noncomputable lemma fg_disk_iso_0 : fundamental_group disk.pointed_space ≅ unit :=
 category_theory.iso.mk
   (λγ, 0)
   (λn, 1)
@@ -65,8 +65,8 @@ category_theory.iso.mk
   end)
   (by {funext, simp})
 
-instance mul_one_class.π₁_D₂ : mul_one_class (fundamental_group disk) := sorry
-instance mul_one_class.π₁_S₁ : mul_one_class (fundamental_group circle) := sorry
+-- instance mul_one_class.π₁_D₂ : mul_one_class (fundamental_group disk.pointed_space) := sorry
+-- instance mul_one_class.π₁_S₁ : mul_one_class (fundamental_group circle.pointed_space) := sorry
 
 instance unit.has_zero : has_zero unit := {
   zero := unit.star,
@@ -82,7 +82,7 @@ instance unit.add_group : add_group unit := {
   add_left_neg := by cc,
 }
 
-lemma no_surj_hom_π₁D₂_to_π₁S₁ (φ : (fundamental_group disk) →* (fundamental_group circle)) :
+lemma no_surj_hom_π₁D₂_to_π₁S₁ (φ : (fundamental_group disk.pointed_space) →* (fundamental_group circle.pointed_space)) :
   ¬ function.surjective φ :=
 begin
   by_contradiction,
@@ -109,7 +109,7 @@ theorem no_retraction_theorem (f : C(disk, frontier disk)) :
 begin
   by_contradiction,
 
-  let φ : (fundamental_group disk) →* (fundamental_group (frontier disk)) :=
+  let φ : (fundamental_group disk.pointed_space) →* (fundamental_group (frontier disk)) :=
     induced_hom f,
 
   have h_surj : function.surjective φ :=
