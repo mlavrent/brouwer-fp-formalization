@@ -50,3 +50,8 @@ instance has_lift.frontier_disk : has_lift (frontier disk) (disk) := {
     exact subtype.mk fd_val fd_val_in_disk,
   end
 }
+
+noncomputable def frontier_disk.pointed_space : pointed_space (frontier disk) :=
+pointed_space.mk
+  subtype.topological_space
+  (subtype.mk (1, 0) (by simp [frontier_disk_eq_circle, circle, norm]))
