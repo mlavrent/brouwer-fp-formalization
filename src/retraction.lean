@@ -21,7 +21,7 @@ structure retraction {α : Type} [topological_space α] {X Y : set α} (r : C(X,
 (hy_sub_x : Y ⊆ X)
 (inclusion_right_inv : function.right_inverse (set.inclusion hy_sub_x) r)
 
-lemma surjective_of_retract {α : Type} [topological_space α] {X Y : set α} (r : C(X, Y)) :
+lemma surjective_of_retraction {α : Type} [topological_space α] {X Y : set α} (r : C(X, Y)) :
   retraction r → function.surjective r :=
 begin
   intro hret,
@@ -30,14 +30,14 @@ begin
   exact hret.inclusion_right_inv,
 end
 
-noncomputable def nth_winding_loop (n : ℤ) : path (1, 0) (1, 0) :=
+noncomputable def nth_winding_loop (n : ℤ) : path pt pt :=
 path.mk
   (continuous_map.mk
     (λt, (real.cos (2 * real.pi * n * t), real.sin (2 * real.pi * n * t)))
     (by continuity))
-  (by simp)
+  (by simp [pt])
   begin
-    simp,
+    simp [pt],
     rw mul_comm _ ↑n,
     apply and.intro,
     apply real.cos_int_mul_two_pi,
@@ -46,10 +46,22 @@ path.mk
     simp,
   end
 
+def nth_winding_loop_class (n : ℤ) : circle.pointed_space.basepoint ⟶ circle.pointed_space.basepoint :=
+@quotient.mk
+  (path pt pt)
+  (path.homotopic.setoid pt pt)
+  (nth_winding_loop n)
+
 noncomputable lemma fg_circle_iso_int : fundamental_group circle.pointed_space ≅ ℤ :=
 category_theory.iso.mk
   (λγ, sorry)
-  (λn, category_theory.iso.mk ⟦nth_winding_loop n⟧ ⟦nth_winding_loop (-n)⟧ _)
+  (λn, category_theory.iso.mk
+    (nth_winding_loop_class n)
+    (nth_winding_loop_class (-n))
+    begin
+      simp,
+      sorry,
+    end)
   sorry
   sorry
 
@@ -58,8 +70,8 @@ category_theory.iso.mk
   (λγ, 0)
   (λn, 1)
   (begin
-    ext,
-    simp,
+    ext γ,
+    simp, -- 1, γ are elements in fundamental group i.e. 1.hom and γ.hom are arrows in fundamental groupoid
     -- apply quotient.sound,
     sorry,
   end)
@@ -109,11 +121,12 @@ theorem no_retraction_theorem (f : C(disk, frontier disk)) :
 begin
   by_contradiction,
 
-  let φ : (fundamental_group disk.pointed_space) →* (fundamental_group (frontier disk)) :=
+  let φ : (fundamental_group disk.pointed_space) →* (fundamental_group circle.pointed_space) :=
     induced_hom f,
 
   have h_surj : function.surjective φ :=
-    @surj_hom_of_surj f (surjective_of_retract f h),
+    @surj_hom_of_surj f (surjective_of_retraction
+   f h),
 
   have hnot_surj : ¬ function.surjective φ := sorry,
   contradiction,
