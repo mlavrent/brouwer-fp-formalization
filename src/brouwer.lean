@@ -5,7 +5,7 @@ import topology.continuous_function.basic
 import .disk
 import .retraction
 
-
+-- TODO: see if we can do this via classical.some i.e. ray & circle have ∩
 def ray_fn (f : disk → disk) (h_no_fix : ∀x, f x ≠ x) : C(disk, frontier disk) :=
 sorry
 
@@ -43,7 +43,7 @@ begin
   let r : disk → frontier disk :=
     ray_fn f h,
 
-  have hf_retract : retract r := {
+  have hf_retract : retraction r := {
     retract_continuous := ray_fn_continuous f h,
     hy_sub_x := frontier_disk_subset_disk,
     inclusion_right_inv := begin
