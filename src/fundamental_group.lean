@@ -76,8 +76,11 @@ let pq_path := joined.some_path (path_connected_space.joined p q) in {
   inv_hom_id' := begin
     apply quotient.sound,
     apply nonempty_of_exists,
-    apply exists.intro, --(linear_symm_homotopy pq_path.symm),
-    repeat {sorry},
+    let homotopy := linear_symm_homotopy pq_path.symm,
+    rw path.symm_symm at homotopy,
+    apply @exists.intro _ (λ_, true)
+      (path.homotopy.symm homotopy)
+      (by tautology),
   end,
 }
 
