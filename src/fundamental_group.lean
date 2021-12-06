@@ -55,19 +55,13 @@ let α := conn_path Xp.basepoint Xq.basepoint in {
   hom := λγ, category_theory.iso.mk
     (α.inv ≫ γ.hom ≫ α.hom)
     (α.inv ≫ γ.inv ≫ α.hom)
-    begin
-      simp,
-      sorry,
-    end
-    begin
-      simp,
-      sorry,
-    end,
+    (by simp)
+    (by simp),
   inv := λγ, category_theory.iso.mk
-    ((conn_path Xp.basepoint Xq.basepoint) ≫ γ.hom ≫ (conn_path Xq.basepoint Xp.basepoint))
-    ((conn_path Xp.basepoint Xq.basepoint) ≫ γ.inv ≫ (conn_path Xq.basepoint Xp.basepoint))
-    sorry
-    sorry,
+    (α.hom ≫ γ.hom ≫ α.inv)
+    (α.hom ≫ γ.inv ≫ α.inv)
+    (by simp)
+    (by simp),
 }
 
 -- TODO: figure out composition below
