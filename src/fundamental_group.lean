@@ -2,6 +2,7 @@ import topology.basic
 import topology.metric_space.basic
 import topology.path_connected
 import topology.continuous_function.basic
+import topology.homotopy.basic
 import topology.homotopy.fundamental_groupoid
 import category_theory.endomorphism
 import category_theory.groupoid
@@ -39,13 +40,45 @@ fundamental_groupoid.category_theory.groupoid.to_category_struct
 def loop {X : Type} [topological_space X] (Xp : pointed_space X) : Type :=
 path Xp.basepoint Xp.basepoint
 
+noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X} (γ : path p q) :
+  path.homotopy (path.refl p) (γ.trans γ.symm) := {
+  to_homotopy := {
+    to_fun := λst, γ (subtype.mk (st.fst.val * (|1 - 2 * st.snd.val|)) sorry),
+    to_fun_zero := by simp,
+    to_fun_one := begin
+      simp,
+      intros t ht,
+      rw path.trans_apply,
+      sorry,
+    end,
+  },
+  prop' := begin -- TODO: is this what we want to prove?
+    intros s t ht,
+    simp,
+    apply and.intro,
+    { sorry, },
+    { sorry, },
+  end,
+}
+
 noncomputable def conn_path {X : Type} [topological_space X] [path_connected_space X] (p q : X) :
   @category_theory.iso (fundamental_groupoid X) _ p q :=
 let pq_path := joined.some_path (path_connected_space.joined p q) in {
   hom := @quotient.mk (path p q) (path.homotopic.setoid p q) pq_path,
   inv := @quotient.mk (path q p) (path.homotopic.setoid q p) pq_path.symm,
-  hom_inv_id' := sorry,
-  inv_hom_id' := sorry,
+  hom_inv_id' := begin
+    apply quotient.sound,
+    apply nonempty_of_exists,
+    apply @exists.intro _ (λ_, true)
+      (path.homotopy.symm (linear_symm_homotopy pq_path))
+      (by tautology),
+  end,
+  inv_hom_id' := begin
+    apply quotient.sound,
+    apply nonempty_of_exists,
+    apply exists.intro, --(linear_symm_homotopy pq_path.symm),
+    repeat {sorry},
+  end,
 }
 
 noncomputable theorem iso_fg_of_path_conn {X : Type} [topological_space X] [path_connected_space X]
