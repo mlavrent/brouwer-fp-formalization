@@ -13,12 +13,19 @@ import .pointed_space
 
 notation `↾` f : 200 := category_theory.as_hom f
 
+/--
+Define the fundamental group as the the automorphism group of the fundamental groupoid i.e.
+the set of all arrows from the basepoint to itself (p ⟶ p).
+-/
 def fundamental_group {X : Type} [topological_space X] (Xp : pointed_space X) : Type :=
 @category_theory.Aut
   X
   (@category_theory.groupoid.to_category (fundamental_groupoid X) _)
   Xp.basepoint
 
+/--
+Use the automorphism group instance to give a group structure to the fundamental group.
+-/
 noncomputable instance fundamental_group.group {X : Type} [topological_space X] {Xp : pointed_space X} :
    group (fundamental_group Xp) :=
 @category_theory.Aut.group
@@ -37,9 +44,16 @@ fundamental_groupoid.category_theory.groupoid.to_category_struct
 --   mul_one := fundamental_group.group.mul_one,
 -- }
 
+/--
+Type alias for working with loops in a space X with basepoint p.
+-/
 def loop {X : Type} [topological_space X] (Xp : pointed_space X) : Type :=
 path Xp.basepoint Xp.basepoint
 
+/--
+Defines the homotopy between an out-and-back path and a point i.e. for path γ
+starting at point p, γ * γ⁻¹ ∼ p.
+-/
 noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X} (γ : path p q) :
   path.homotopy (path.refl p) (γ.trans γ.symm) := {
   to_homotopy := {
@@ -61,6 +75,10 @@ noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X
   end,
 }
 
+/--
+Given a path connected space X and two points p, q, we return a path between them
+along with the reverse path, bundled together.
+-/
 noncomputable def conn_path {X : Type} [topological_space X] [path_connected_space X] (p q : X) :
   @category_theory.iso (fundamental_groupoid X) _ p q :=
 let pq_path := joined.some_path (path_connected_space.joined p q) in {
@@ -84,6 +102,9 @@ let pq_path := joined.some_path (path_connected_space.joined p q) in {
   end,
 }
 
+/--
+Given a path connected space X, the fundamental group is independent of which basepoint was used.
+-/
 noncomputable theorem iso_fg_of_path_conn {X : Type} [topological_space X] [path_connected_space X]
   (Xp : pointed_space X) (Xq : pointed_space X) :
   (fundamental_group Xp) ≅ (fundamental_group Xq) :=
@@ -101,6 +122,10 @@ let α := conn_path Xp.basepoint Xq.basepoint in {
 }
 
 -- TODO: figure out composition below
+/--
+Given a function f : X → Y, returns the induced map between the fundamental groups i.e.
+returns f⋆ : π₁(X) → π₁(Y).
+-/
 noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_space Y]
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
   (fundamental_group Xp) →* (fundamental_group Yq) := {
@@ -114,6 +139,9 @@ noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_sp
   map_mul' := sorry,
 }
 
+/--
+Given a surjective map f : X → Y, the induced map f⋆ on fundamental groups is also surjective.
+-/
 lemma surj_hom_of_surj {X Y : Type} [topological_space X] [topological_space Y]
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
   function.surjective f → function.surjective (induced_hom f) :=
