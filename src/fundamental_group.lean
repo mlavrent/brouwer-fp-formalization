@@ -140,7 +140,6 @@ let α := conn_path Xp.basepoint Xq.basepoint in {
     (by simp),
 }
 
--- TODO: figure out composition below
 /--
 Given a continuous function between pointed spaces, we can create a functor between the
 associated fundamental groupoids of the spaces.
@@ -153,6 +152,8 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
     intros p₁ p₂ α,
     let x_setoid := path.homotopic.setoid (↓p₁) (↓p₂),
     let y_setoid := path.homotopic.setoid (f ↓p₁) (f ↓p₂),
+    have h_cont : continuous ⇑f := f.to_continuous_map.continuous,
+
     let f_path : path (↓p₁) (↓p₂) → path (f ↓p₁) (f ↓p₂) :=
       λγ, {
         to_continuous_map := {
@@ -176,11 +177,15 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
         apply nonempty.intro,
         exact {
           to_homotopy := {
-            to_fun := f ∘ (classical.choice h_homotopic), -- TODO: figure this out
-            to_fun_zero := sorry,
-            to_fun_one := sorry,
+            to_fun := f ∘ ⇑(classical.choice h_homotopic),
+            to_fun_zero := by simp,
+            to_fun_one := by simp,
           },
-          prop' := sorry,
+          prop' := begin
+            intros s t h,
+            simp,
+            sorry, -- TODO: is this what we want to prove?
+          end,
         },
       end,
     exact f_lift α,
@@ -188,6 +193,12 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
 }
 
 notation `↟` f : 70 := induced_groupoid_functor f
+
+@[simp]
+lemma f_of_induced_groupoid_functor {X Y : Type} [topological_space X] [topological_space Y]
+  {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
+  (↟f).obj = f :=
+by simp [induced_groupoid_functor]
 
 /--
 Given a function f : X → Y, returns the induced map between the fundamental groups i.e.
@@ -197,8 +208,20 @@ noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_sp
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
   (fundamental_group Xp) →* (fundamental_group Yq) := {
   to_fun := λγ, {
-    hom := (↟f).map γ.hom,
-    inv := sorry,
+    hom := --(↟f).map γ.hom,
+      begin
+        let δ := (↟f).map γ.hom,
+        have h_pointed : f Xp.basepoint = Yq.basepoint := pointed_continuous_map.pointed_map f,
+        simp [induced_groupoid_functor, h_pointed] at δ,
+        exact δ,
+      end,
+    inv :=
+      begin
+        let δ := (↟f).map γ.inv,
+        have h_pointed : f Xp.basepoint = Yq.basepoint := pointed_continuous_map.pointed_map f,
+        simp [induced_groupoid_functor, h_pointed] at δ,
+        exact δ,
+      end,
     hom_inv_id' := sorry,
     inv_hom_id' := sorry,
   },
