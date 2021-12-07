@@ -141,16 +141,20 @@ let α := conn_path Xp.basepoint Xq.basepoint in {
 }
 
 -- TODO: figure out composition below
-
+/--
+Given a continuous function between pointed spaces, we can create a functor between the
+associated fundamental groupoids of the spaces.
+-/
 noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [topological_space Y]
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
   fundamental_groupoid X ⥤ fundamental_groupoid Y := {
   obj := f,
   map := begin
     intros p₁ p₂ α,
-
-    have f_path : path (↓p₁) (↓p₂) → ((f p₁) ⟶ (f p₂)) :=
-      λγ, @quotient.mk _ (path.homotopic.setoid (f ↓p₁) (f ↓p₂)) {
+    let x_setoid := path.homotopic.setoid (↓p₁) (↓p₂),
+    let y_setoid := path.homotopic.setoid (f ↓p₁) (f ↓p₂),
+    let f_path : path (↓p₁) (↓p₂) → path (f ↓p₁) (f ↓p₂) :=
+      λγ, {
         to_continuous_map := {
           to_fun := f ∘ γ,
           continuous_to_fun := begin
@@ -162,13 +166,22 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
         source' := by simp,
         target' := by simp,
       },
-
-    have f_lift : (p₁ ⟶ p₂) → ((f p₁) ⟶ (f p₂)) :=
+    let f_path_class : path (↓p₁) (↓p₂) → ((f p₁) ⟶ (f p₂)) :=
+      λγ, @quotient.mk _ y_setoid (f_path γ),
+    let f_lift : (p₁ ⟶ p₂) → ((f p₁) ⟶ (f p₂)) :=
       begin
-        apply @quotient.lift _ _ (path.homotopic.setoid p₁ p₂) f_path,
+        apply @quotient.lift _ _ x_setoid f_path_class,
         intros γ₁ γ₂ h_homotopic,
-
-        sorry,
+        apply quotient.sound,
+        apply nonempty.intro,
+        exact {
+          to_homotopy := {
+            to_fun := f ∘ (classical.choice h_homotopic), -- TODO: figure this out
+            to_fun_zero := sorry,
+            to_fun_one := sorry,
+          },
+          prop' := sorry,
+        },
       end,
     exact f_lift α,
   end,
