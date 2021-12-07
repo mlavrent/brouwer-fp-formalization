@@ -11,8 +11,6 @@ import category_theory.category.basic
 import category_theory.types
 import .pointed_space
 
-notation `↾` f : 200 := category_theory.as_hom f
-
 /--
 Define the fundamental group as the the automorphism group of the fundamental groupoid i.e.
 the set of all arrows from the basepoint to itself (p ⟶ p).
@@ -44,11 +42,20 @@ fundamental_groupoid.category_theory.groupoid.to_category_struct
 --   mul_one := fundamental_group.group.mul_one,
 -- }
 
+@[simp]
+def space_of_fg {X : Type} [topological_space X] (p : fundamental_groupoid X) : X := p
+notation `↓` p : 70 := space_of_fg p
+
 /--
 Type alias for working with loops in a space X with basepoint p.
 -/
 def loop {X : Type} [topological_space X] (Xp : pointed_space X) : Type :=
 path Xp.basepoint Xp.basepoint
+
+example (a b c d : ℝ) : a ≤ b → a + c ≤ b + c :=
+begin
+  simp,
+end
 
 /--
 Defines the homotopy between an out-and-back path and a point i.e. for path γ
@@ -63,7 +70,19 @@ noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X
       simp,
       intros t ht,
       rw path.trans_apply,
-      sorry,
+      cases abs_cases (1 - 2 * t),
+      case or.inl {
+        have h₁ := and.elim_left h,
+        have h₂ := and.elim_right h,
+        have hle : t ≤ 1/2 := by linarith,
+        sorry,
+      },
+      case or.inr {
+        have h₁ := and.elim_left h,
+        have h₂ := and.elim_right h,
+        have hge : t ≥ 1/2 := by linarith,
+        sorry,
+      },
     end,
   },
   prop' := begin -- TODO: is this what we want to prove?
@@ -122,6 +141,45 @@ let α := conn_path Xp.basepoint Xq.basepoint in {
 }
 
 -- TODO: figure out composition below
+
+noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [topological_space Y]
+  {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
+  fundamental_groupoid X ⥤ fundamental_groupoid Y := {
+  obj := f,
+  map := begin
+    intros p₁ p₂ α,
+
+    have f_path : path (↓p₁) (↓p₂) → ((f p₁) ⟶ (f p₂)) :=
+      begin
+        intro γ,
+        apply quotient.mk,
+        have y_path : path (f p₁) (f p₂) := {
+          to_continuous_map := {
+            to_fun := f ∘ γ,
+            continuous_to_fun := begin
+              apply continuous.comp,
+              { exact continuous_map.continuous_to_fun f.to_continuous_map, },
+              { exact continuous_map.continuous_to_fun γ.to_continuous_map, },
+            end,
+          },
+          source' := by simp,
+          target' := by simp,
+        },
+        exact y_path,
+      end,
+
+    have f_lift : (p₁ ⟶ p₂) → ((f p₁) ⟶ (f p₂)) :=
+      begin
+        apply @quotient.lift _ _ (path.homotopic.setoid p₁ p₂) f_path,
+        intros γ₁ γ₂ h_homotopic,
+        sorry,
+      end,
+    exact f_lift α,
+  end,
+}
+
+notation `↾` f : 70 := induced_groupoid_functor f
+
 /--
 Given a function f : X → Y, returns the induced map between the fundamental groups i.e.
 returns f⋆ : π₁(X) → π₁(Y).
@@ -130,7 +188,7 @@ noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_sp
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
   (fundamental_group Xp) →* (fundamental_group Yq) := {
   to_fun := λγ, {
-    hom := γ.hom ≫ f, -- TODO: define f on fundamental groupoids;
+    hom := (↾f).map γ.hom,
     inv := sorry,
     hom_inv_id' := sorry,
     inv_hom_id' := sorry,
