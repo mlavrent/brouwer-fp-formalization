@@ -150,35 +150,31 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
     intros p₁ p₂ α,
 
     have f_path : path (↓p₁) (↓p₂) → ((f p₁) ⟶ (f p₂)) :=
-      begin
-        intro γ,
-        apply quotient.mk,
-        have y_path : path (f p₁) (f p₂) := {
-          to_continuous_map := {
-            to_fun := f ∘ γ,
-            continuous_to_fun := begin
-              apply continuous.comp,
-              { exact continuous_map.continuous_to_fun f.to_continuous_map, },
-              { exact continuous_map.continuous_to_fun γ.to_continuous_map, },
-            end,
-          },
-          source' := by simp,
-          target' := by simp,
+      λγ, @quotient.mk _ (path.homotopic.setoid (f ↓p₁) (f ↓p₂)) {
+        to_continuous_map := {
+          to_fun := f ∘ γ,
+          continuous_to_fun := begin
+            apply continuous.comp,
+            { exact continuous_map.continuous_to_fun f.to_continuous_map, },
+            { exact continuous_map.continuous_to_fun γ.to_continuous_map, },
+          end,
         },
-        exact y_path,
-      end,
+        source' := by simp,
+        target' := by simp,
+      },
 
     have f_lift : (p₁ ⟶ p₂) → ((f p₁) ⟶ (f p₂)) :=
       begin
         apply @quotient.lift _ _ (path.homotopic.setoid p₁ p₂) f_path,
         intros γ₁ γ₂ h_homotopic,
+
         sorry,
       end,
     exact f_lift α,
   end,
 }
 
-notation `↾` f : 70 := induced_groupoid_functor f
+notation `↟` f : 70 := induced_groupoid_functor f
 
 /--
 Given a function f : X → Y, returns the induced map between the fundamental groups i.e.
@@ -188,7 +184,7 @@ noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_sp
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
   (fundamental_group Xp) →* (fundamental_group Yq) := {
   to_fun := λγ, {
-    hom := (↾f).map γ.hom,
+    hom := (↟f).map γ.hom,
     inv := sorry,
     hom_inv_id' := sorry,
     inv_hom_id' := sorry,
