@@ -87,8 +87,8 @@ noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X
     intro ht;
     apply and.intro;
     simp [ht],
-    sorry,
-    sorry,
+    { sorry, },
+    { sorry, },
   end,
 }
 
@@ -186,6 +186,7 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
             intro ht;
             apply and.intro;
             simp [ht],
+            sorry,
           end,
         },
       end,
