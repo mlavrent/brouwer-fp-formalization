@@ -64,7 +64,12 @@ starting at point p, γ * γ⁻¹ ∼ p.
 noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X} (γ : path p q) :
   path.homotopy (path.refl p) (γ.trans γ.symm) := {
   to_homotopy := {
-    to_fun := λst, γ (subtype.mk (st.fst.val * (1 - |1 - 2 * st.snd.val|)) sorry),
+    to_fun := λst, γ (subtype.mk (st.fst.val * (1 - |1 - 2 * st.snd.val|)) begin
+      simp,
+      apply and.intro,
+      { sorry }, -- abs_by_cases
+      { sorry, },
+    end),
     to_fun_zero := by simp,
     to_fun_one := begin
       simp,
@@ -76,11 +81,14 @@ noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X
     end,
   },
   prop' := begin
-    intros s t ht,
-    simp,
-    apply and.intro,
-    { sorry, },
-    { sorry, },
+    intros s t ht_endpoint,
+    simp at *,
+    apply or.elim ht_endpoint;
+    intro ht;
+    apply and.intro;
+    simp [ht],
+    sorry,
+    sorry,
   end,
 }
 
@@ -172,9 +180,12 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
             to_fun_one := by simp,
           },
           prop' := begin
-            intros s t h,
-            simp,
-            sorry,
+            intros s t ht_endpoint,
+            simp at *,
+            apply or.elim ht_endpoint;
+            intro ht;
+            apply and.intro;
+            simp [ht],
           end,
         },
       end,
@@ -184,6 +195,9 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
 
 notation `↟` f : 70 := induced_groupoid_functor f
 
+/--
+Helpful rewrite lemma for dealing with the
+-/
 @[simp]
 lemma f_of_induced_groupoid_functor {X Y : Type} [topological_space X] [topological_space Y]
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
