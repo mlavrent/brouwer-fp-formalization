@@ -52,9 +52,9 @@ Type alias for working with loops in a space X with basepoint p.
 def loop {X : Type} [topological_space X] (Xp : pointed_space X) : Type :=
 path Xp.basepoint Xp.basepoint
 
-example (a b c d : ℝ) : a ≤ b → a + c ≤ b + c :=
+example (X Y : Type) (f : X → Y) (a b : X) : a = b → f a = f b :=
 begin
-  simp,
+  exact congr_arg (λ (a : X), f a),
 end
 
 /--
@@ -64,28 +64,18 @@ starting at point p, γ * γ⁻¹ ∼ p.
 noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X} (γ : path p q) :
   path.homotopy (path.refl p) (γ.trans γ.symm) := {
   to_homotopy := {
-    to_fun := λst, γ (subtype.mk (st.fst.val * (|1 - 2 * st.snd.val|)) sorry),
+    to_fun := λst, γ (subtype.mk (st.fst.val * (1 - |1 - 2 * st.snd.val|)) sorry),
     to_fun_zero := by simp,
     to_fun_one := begin
       simp,
       intros t ht,
       rw path.trans_apply,
-      cases abs_cases (1 - 2 * t),
-      case or.inl {
-        have h₁ := and.elim_left h,
-        have h₂ := and.elim_right h,
-        have hle : t ≤ 1/2 := by linarith,
-        sorry,
-      },
-      case or.inr {
-        have h₁ := and.elim_left h,
-        have h₂ := and.elim_right h,
-        have hge : t ≥ 1/2 := by linarith,
-        sorry,
-      },
+      split_ifs; simp [unit_interval.symm]; apply congr_arg,
+      sorry,
+      sorry,
     end,
   },
-  prop' := begin -- TODO: is this what we want to prove?
+  prop' := begin
     intros s t ht,
     simp,
     apply and.intro,
@@ -184,7 +174,7 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
           prop' := begin
             intros s t h,
             simp,
-            sorry, -- TODO: is this what we want to prove?
+            sorry,
           end,
         },
       end,
@@ -197,8 +187,7 @@ notation `↟` f : 70 := induced_groupoid_functor f
 @[simp]
 lemma f_of_induced_groupoid_functor {X Y : Type} [topological_space X] [topological_space Y]
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
-  (↟f).obj = f :=
-by simp [induced_groupoid_functor]
+  (↟f).obj = f := by refl
 
 /--
 Given a function f : X → Y, returns the induced map between the fundamental groups i.e.
@@ -208,10 +197,12 @@ noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_sp
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
   (fundamental_group Xp) →* (fundamental_group Yq) := {
   to_fun := λγ, {
-    hom := --(↟f).map γ.hom,
+    hom :=
       begin
         let δ := (↟f).map γ.hom,
         have h_pointed : f Xp.basepoint = Yq.basepoint := pointed_continuous_map.pointed_map f,
+        -- rw f_of_induced_groupoid_functor at δ,
+        -- rw h_pointed at δ,
         simp [induced_groupoid_functor, h_pointed] at δ,
         exact δ,
       end,
@@ -222,7 +213,9 @@ noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_sp
         simp [induced_groupoid_functor, h_pointed] at δ,
         exact δ,
       end,
-    hom_inv_id' := sorry,
+    hom_inv_id' := begin -- TODO: deal with the cast (get rid of it and the rest is trivial via simp)
+      simp, sorry,
+    end,
     inv_hom_id' := sorry,
   },
   map_one' := sorry,
