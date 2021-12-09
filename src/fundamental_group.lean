@@ -11,6 +11,11 @@ import category_theory.category.basic
 import category_theory.types
 import .pointed_space
 
+example {X Y : Type} [setoid X] (f : X → Y) (x : X) (h : ∀ (a b : X), a ≈ b → f a = f b) :
+  (quotient.lift f h) ⟦x⟧ = f x := begin
+    exact quotient.lift_mk f h x
+  end
+
 /--
 Define the fundamental group as the the automorphism group of the fundamental groupoid i.e.
 the set of all arrows from the basepoint to itself (p ⟶ p).
@@ -34,6 +39,8 @@ noncomputable instance fundamental_group.group {X : Type} [topological_space X] 
 noncomputable instance category_struct.topological_space {X : Type} [topological_space X] : category_theory.category_struct X :=
 fundamental_groupoid.category_theory.groupoid.to_category_struct
 
+-- instance quiver.fundamental_groupoid {X : Type} [topological_space X]
+
 -- noncomputable instance fundamental_group.mul_one_class {X : Type} [topological_space X] {Xp : pointed_space X} :
 --   mul_one_class (fundamental_group Xp) := {
 --   one := fundamental_group.group.one,
@@ -46,6 +53,9 @@ fundamental_groupoid.category_theory.groupoid.to_category_struct
 def space_of_fg {X : Type} [topological_space X] (p : fundamental_groupoid X) : X := p
 notation `↓` p : 70 := space_of_fg p
 
+def path_quotient_of_groupoid_arrow {X : Type} [topological_space X] {a b : fundamental_groupoid X} :
+  (a ⟶ b) = quotient (path.homotopic.setoid (↓a) (↓b)) := rfl
+
 /--
 Type alias for working with loops in a space X with basepoint p.
 -/
@@ -57,6 +67,42 @@ begin
   exact congr_arg (λ (a : X), f a),
 end
 
+
+set_option trace.simplify.rewrite true
+
+@[simp]
+lemma sub_12 : (1 : ℝ) - (2 : ℝ) = -1 :=
+by linarith
+
+@[simp]
+lemma arith (s : ℝ) : s * (1 - |1 - 2|) = 0 :=
+calc s * (1 - |1 - 2|) = s * (1 - |(-1)|) : by rw sub_12
+... = s * (1 - 1) : by simp
+... = s * 0 : by rw sub_self
+... = 0 : mul_zero s
+
+@[simp]
+lemma arith2 (a : ℝ) : 2 * a ≤ 1 + 1 ↔ a ≤ 1 := begin
+  split;
+  { intros, linarith, },
+end
+
+@[simp]
+lemma unit_interval_bound_fst (st : unit_interval × unit_interval) : st.fst ≥ 0 ∧ st.fst ≤ 1 :=
+begin
+  apply and.intro,
+  exact unit_interval.nonneg',
+  exact unit_interval.le_one',
+end
+
+@[simp]
+lemma unit_interval_bound_snd (st : unit_interval × unit_interval) : st.snd ≥ 0 ∧ st.snd ≤ 1 :=
+begin
+  apply and.intro,
+  exact unit_interval.nonneg',
+  exact unit_interval.le_one',
+end
+
 /--
 Defines the homotopy between an out-and-back path and a point i.e. for path γ
 starting at point p, γ * γ⁻¹ ∼ p.
@@ -66,18 +112,38 @@ noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X
   to_homotopy := {
     to_fun := λst, γ (subtype.mk (st.fst.val * (1 - |1 - 2 * st.snd.val|)) begin
       simp,
-      apply and.intro,
-      { sorry }, -- abs_by_cases
-      { sorry, },
+      have hs : st.fst ≥ 0 ∧ st.fst ≤ 1 := unit_interval_bound_fst st,
+      have ht : st.snd ≥ 0 ∧ st.snd ≤ 1 := unit_interval_bound_snd st,
+      apply and.intro;
+      apply or.elim (abs_cases ((1 : ℝ) - 2 * ↑(st.snd)));
+      intro h;
+      rw (and.elim_left h),
+      { apply mul_nonneg,
+        repeat {simp, tautology}, },
+      { apply mul_nonneg,
+        repeat {simp, tautology}, },
+      { apply mul_le_one,
+        tautology, simp, tautology, simp, linarith, },
+      { apply mul_le_one,
+        tautology, simp, tautology, simp, linarith, },
     end),
     to_fun_zero := by simp,
     to_fun_one := begin
       simp,
       intros t ht,
       rw path.trans_apply,
-      split_ifs; simp [unit_interval.symm]; apply congr_arg,
-      sorry,
-      sorry,
+      split_ifs;
+      simp [unit_interval.symm];
+      apply congr_arg;
+      apply subtype.eq;
+      simp;
+      rw subtype.coe_mk at h,
+      { have h_abs_pos : 0 ≤ 1 - 2 * t := by linarith, -- TODO: finish this!
+        rw abs_of_nonneg h_abs_pos,
+        linarith, },
+      { have h_abs_neg : 1 - 2 * t ≤ 0 := by linarith,
+        rw abs_of_nonpos h_abs_neg,
+        linarith, },
     end,
   },
   prop' := begin
@@ -87,8 +153,6 @@ noncomputable def linear_symm_homotopy {X : Type} [topological_space X] {p q : X
     intro ht;
     apply and.intro;
     simp [ht],
-    { sorry, },
-    { sorry, },
   end,
 }
 
@@ -186,11 +250,17 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
             intro ht;
             apply and.intro;
             simp [ht],
-            sorry,
           end,
         },
       end,
     exact f_lift α,
+  end,
+  map_comp' := begin
+    intros a b c δ ε,
+    rw path_quotient_of_groupoid_arrow at δ,
+    rw path_quotient_of_groupoid_arrow at ε,
+    simp,
+    sorry,
   end,
 }
 
