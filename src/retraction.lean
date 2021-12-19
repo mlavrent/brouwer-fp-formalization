@@ -94,6 +94,8 @@ instance unit.add_group : add_group unit := {
   add_left_neg := by cc,
 }
 
+set_option trace.class_instances
+
 lemma no_surj_hom_π₁D₂_to_π₁S₁ (φ : (fundamental_group disk.pointed_space) →* (fundamental_group circle.pointed_space)) :
   ¬ function.surjective φ :=
 begin
@@ -101,7 +103,7 @@ begin
   let ψ := fg_disk_iso_0.inv ≫ φ ≫ fg_circle_iso_int.hom,
 
   have hψ_epi : category_theory.epi ψ := begin
-    -- apply @category_theory.epi_of_epi_fac _ _ _ _ _ π₁_D₂_iso_0.inv (φ ≫ π₁_S₁_iso_ℤ.hom) ψ _,
+    -- apply @category_theory.epi_of_epi_fac _ _ _ _ _ fg_disk_iso_0.inv (φ ≫ fg_circle_iso_int.hom) ψ _,
     sorry,
   end,
 
@@ -109,6 +111,24 @@ begin
     rw category_theory.epi_iff_surjective,
     apply not_surjective_fintype_infinite,
   end,
+  contradiction,
+end
+
+lemma no_surj_hom_π₁D₂_to_frontier (φ : (fundamental_group disk.pointed_space) →* (fundamental_group frontier_disk.pointed_space)) :
+  ¬ function.surjective φ :=
+begin
+  by_contradiction,
+  let φ' : (fundamental_group disk.pointed_space) →* (fundamental_group circle.pointed_space) := sorry,
+    -- (pointed_map_of_continuous_map frontier_disk_homeo_circle.to_fun) ∘ φ,
+    -- compose these somehow
+
+  have h_φ'_surj : function.surjective φ' :=
+    begin
+      apply function.surjective.comp,
+      { sorry },
+      { sorry },
+    end,
+  have h_φ'_not_surj : ¬ function.surjective φ' := no_surj_hom_π₁D₂_to_π₁S₁ φ',
   contradiction,
 end
 
@@ -121,13 +141,39 @@ theorem no_retraction_theorem (f : C(disk, frontier disk)) :
 begin
   by_contradiction,
 
-  let φ : (fundamental_group disk.pointed_space) →* (fundamental_group circle.pointed_space) :=
-    induced_hom f,
+  let codomain_ptd_space : pointed_space (frontier disk) := ⟨f disk.pointed_space.basepoint⟩,
 
-  have h_surj : function.surjective φ :=
-    @surj_hom_of_surj f (surjective_of_retraction
-   f h),
+  have h_iso : fundamental_group codomain_ptd_space ≃* fundamental_group frontier_disk.pointed_space :=
+    mulequiv_fg_of_path_conn codomain_ptd_space frontier_disk.pointed_space,
 
-  have hnot_surj : ¬ function.surjective φ := sorry,
+  let f_ptd : Cp(disk.pointed_space, codomain_ptd_space) := {
+    to_fun := f,
+    pointed_map := by refl,
+  },
+  have h_fptd_eq_f : f_ptd.to_continuous_map = f := begin
+    ext,
+    repeat {simp [f_ptd]},
+  end,
+
+  let φ_pre : (fundamental_group disk.pointed_space) →* (fundamental_group codomain_ptd_space) :=
+    induced_hom f_ptd,
+  have h_φpre_surj : function.surjective φ_pre :=
+    surj_hom_of_surj f_ptd begin
+      apply surjective_of_retraction,
+      rw h_fptd_eq_f,
+      exact h,
+    end,
+
+  let φ : (fundamental_group disk.pointed_space) →* (fundamental_group frontier_disk.pointed_space) :=
+    monoid_hom.comp (mul_equiv.to_monoid_hom h_iso) φ_pre,
+
+  have h_φ_surj : function.surjective φ :=
+    begin
+      apply function.surjective.comp,
+      { exact mul_equiv.surjective h_iso, },
+      { exact h_φpre_surj, },
+    end,
+  have hnot_surj : ¬ function.surjective φ := no_surj_hom_π₁D₂_to_frontier φ,
+
   contradiction,
 end

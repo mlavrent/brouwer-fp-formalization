@@ -36,25 +36,27 @@ noncomputable instance fundamental_group.group {X : Type} [topological_space X] 
   (@category_theory.groupoid.to_category (fundamental_groupoid X) _)
   Xp.basepoint
 
-noncomputable instance category_struct.topological_space {X : Type} [topological_space X] : category_theory.category_struct X :=
-fundamental_groupoid.category_theory.groupoid.to_category_struct
-
--- instance quiver.fundamental_groupoid {X : Type} [topological_space X]
-
--- noncomputable instance fundamental_group.mul_one_class {X : Type} [topological_space X] {Xp : pointed_space X} :
---   mul_one_class (fundamental_group Xp) := {
---   one := fundamental_group.group.one,
---   mul := fundamental_group.group.mul,
---   one_mul := fundamental_group.group.one_mul,
---   mul_one := fundamental_group.group.mul_one,
--- }
+noncomputable instance category.topological_space (X : Type) [topological_space X] : category_theory.category X :=
+fundamental_groupoid.category_theory.groupoid.to_category
 
 @[simp]
 def space_of_fg {X : Type} [topological_space X] (p : fundamental_groupoid X) : X := p
-notation `↓` p : 70 := space_of_fg p
+notation `↘` p : 70 := space_of_fg p
+
+def fg_of_space {X : Type} [topological_space X] (p : X) : fundamental_groupoid X := p
+notation `↗` p : 70 := fg_of_space p
 
 def path_quotient_of_groupoid_arrow {X : Type} [topological_space X] {a b : fundamental_groupoid X} :
-  (a ⟶ b) = quotient (path.homotopic.setoid (↓a) (↓b)) := rfl
+  (a ⟶ b) = quotient (path.homotopic.setoid (↘a) (↘b)) := rfl
+
+
+lemma fg_mul {X : Type} [topological_space X] {Xp : pointed_space X} (a b : fundamental_group Xp) :
+  a * b = category_theory.iso.trans b a :=
+by refl
+
+lemma fg_one {X : Type} [topological_space X] {Xp : pointed_space X}:
+  (1 : fundamental_group Xp) = @category_theory.iso.refl X (category.topological_space X) (Xp.basepoint) :=
+by refl
 
 /--
 Type alias for working with loops in a space X with basepoint p.
@@ -69,6 +71,10 @@ end
 
 
 set_option trace.simplify.rewrite true
+
+/-
+The following is a set of helper lemmas for rewriting computations on ℝ.
+-/
 
 @[simp]
 lemma sub_12 : (1 : ℝ) - (2 : ℝ) = -1 :=
@@ -203,6 +209,49 @@ let α := conn_path Xp.basepoint Xq.basepoint in {
 }
 
 /--
+Similar to `iso_fg_of_path_conn`, except it defines a group isomorphism between the two fundamental groups
+as opposed to a category isomorphism.
+-/
+noncomputable theorem mulequiv_fg_of_path_conn {X : Type} [topological_space X] [path_connected_space X]
+  (Xp : pointed_space X) (Xq : pointed_space X) :
+  (fundamental_group Xp) ≃* (fundamental_group Xq) :=
+let α := conn_path Xp.basepoint Xq.basepoint in {
+  to_fun := λγ, category_theory.iso.mk
+    (α.inv ≫ γ.hom ≫ α.hom)
+    (α.inv ≫ γ.inv ≫ α.hom)
+    (by simp)
+    (by simp),
+  inv_fun := λγ, category_theory.iso.mk
+    (α.hom ≫ γ.hom ≫ α.inv)
+    (α.hom ≫ γ.inv ≫ α.inv)
+    (by simp)
+    (by simp),
+
+  left_inv :=
+    begin
+      intro γ,
+      simp,
+      apply category_theory.iso.ext,
+      refl,
+    end,
+  right_inv :=
+    begin
+      intro γ,
+      simp,
+      apply category_theory.iso.ext,
+      refl,
+    end,
+  map_mul' :=
+    begin
+      intros γ₁ γ₂,
+      rw @fg_mul _ _ Xq,
+      apply category_theory.iso.ext,
+      rw fg_mul,
+      simp,
+    end,
+}
+
+/--
 Given a continuous function between pointed spaces, we can create a functor between the
 associated fundamental groupoids of the spaces.
 -/
@@ -212,11 +261,11 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
   obj := f,
   map := begin
     intros p₁ p₂ α,
-    let x_setoid := path.homotopic.setoid (↓p₁) (↓p₂),
-    let y_setoid := path.homotopic.setoid (f ↓p₁) (f ↓p₂),
+    let x_setoid := path.homotopic.setoid (↘p₁) (↘p₂),
+    let y_setoid := path.homotopic.setoid (f ↘p₁) (f ↘p₂),
     have h_cont : continuous ⇑f := f.to_continuous_map.continuous,
 
-    let f_path : path (↓p₁) (↓p₂) → path (f ↓p₁) (f ↓p₂) :=
+    let f_path : path (↘p₁) (↘p₂) → path (f ↘p₁) (f ↘p₂) :=
       λγ, {
         to_continuous_map := {
           to_fun := f ∘ γ,
@@ -229,7 +278,7 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
         source' := by simp,
         target' := by simp,
       },
-    let f_path_class : path (↓p₁) (↓p₂) → ((f p₁) ⟶ (f p₂)) :=
+    let f_path_class : path (↘p₁) (↘p₂) → ((f p₁) ⟶ (f p₂)) :=
       λγ, @quotient.mk _ y_setoid (f_path γ),
     let f_lift : (p₁ ⟶ p₂) → ((f p₁) ⟶ (f p₂)) :=
       begin
@@ -260,19 +309,26 @@ noncomputable def induced_groupoid_functor {X Y : Type} [topological_space X] [t
     rw path_quotient_of_groupoid_arrow at δ,
     rw path_quotient_of_groupoid_arrow at ε,
     simp,
+    -- rw quotient.lift_mk,
     sorry,
   end,
 }
 
 notation `↟` f : 70 := induced_groupoid_functor f
 
+-- ℤ
 /--
 Helpful rewrite lemma for dealing with the
 -/
 @[simp]
 lemma f_of_induced_groupoid_functor {X Y : Type} [topological_space X] [topological_space Y]
+  {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) (x : X) :
+  (↟f).obj x = f x := by refl
+
+@[simp]
+lemma induced_functor_of_id {X Y : Type} [topological_space X] [topological_space Y]
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
-  (↟f).obj = f := by refl
+  (↟f).map (𝟙 Xp.basepoint) = 𝟙 ((↟f).obj Xp.basepoint) := by simp
 
 /--
 Given a function f : X → Y, returns the induced map between the fundamental groups i.e.
@@ -280,31 +336,43 @@ returns f⋆ : π₁(X) → π₁(Y).
 -/
 noncomputable def induced_hom {X Y : Type} [topological_space X] [topological_space Y]
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
-  (fundamental_group Xp) →* (fundamental_group Yq) := {
+  (fundamental_group Xp) →* (fundamental_group Yq) :=
+let h_pointed : f Xp.basepoint = Yq.basepoint := pointed_continuous_map.pointed_map f in
+let q1 : (↟f).obj Xp.basepoint ⟶ Yq.basepoint := begin simp [h_pointed], exact 𝟙 Yq.basepoint, end in
+let q2 : Yq.basepoint ⟶ (↟f).obj Xp.basepoint := begin simp [h_pointed], exact 𝟙 Yq.basepoint, end in
+let h_qinv₁ : q1 ≫ q2 = 𝟙 ((↟f).obj Xp.basepoint) := sorry in
+let h_qinv₂ : q2 ≫ q1 = 𝟙 Yq.basepoint := sorry in
+{
   to_fun := λγ, {
-    hom :=
-      begin
-        let δ := (↟f).map γ.hom,
-        have h_pointed : f Xp.basepoint = Yq.basepoint := pointed_continuous_map.pointed_map f,
-        -- rw f_of_induced_groupoid_functor at δ,
-        -- rw h_pointed at δ,
-        simp [induced_groupoid_functor, h_pointed] at δ,
-        exact δ,
-      end,
-    inv :=
-      begin
-        let δ := (↟f).map γ.inv,
-        have h_pointed : f Xp.basepoint = Yq.basepoint := pointed_continuous_map.pointed_map f,
-        simp [induced_groupoid_functor, h_pointed] at δ,
-        exact δ,
-      end,
-    hom_inv_id' := begin -- TODO: deal with the cast (get rid of it and the rest is trivial via simp)
-      simp, sorry,
-    end,
-    inv_hom_id' := sorry,
+    hom := q2 ≫ (↟f).map γ.hom ≫ q1,
+    inv := q2 ≫ (↟f).map γ.inv ≫ q1,
+    hom_inv_id' :=
+      calc (q2 ≫ (↟f).map γ.hom ≫ q1) ≫ q2 ≫ (↟f).map γ.inv ≫ q1 = q2 ≫ ((↟f).map γ.hom ≫ (q1 ≫ q2) ≫ (↟f).map γ.inv) ≫ q1 : by simp
+        ... = q2 ≫ ((↟f).map γ.hom ≫ (↟f).map γ.inv) ≫ q1 : by simp [h_qinv₁]
+        ... = q2 ≫ 𝟙 ((↟f).obj Xp.basepoint) ≫ q1 : begin rw ← category_theory.functor.map_comp (↟f) γ.hom γ.inv, simp, end
+        ... = 𝟙 Yq.basepoint : by simp [h_qinv₂],
+    inv_hom_id' :=
+      calc (q2 ≫ (↟f).map γ.inv ≫ q1) ≫ q2 ≫ (↟f).map γ.hom ≫ q1 = q2 ≫ ((↟f).map γ.inv ≫ (q1 ≫ q2) ≫ (↟f).map γ.hom) ≫ q1 : by simp
+        ... = q2 ≫ ((↟f).map γ.inv ≫ (↟f).map γ.hom) ≫ q1 : by simp [h_qinv₁]
+        ... = q2 ≫ 𝟙 ((↟f).obj Xp.basepoint) ≫ q1 : begin rw ← category_theory.functor.map_comp (↟f) γ.inv γ.hom, simp, end
+        ... = 𝟙 Yq.basepoint : by simp [h_qinv₂],
   },
-  map_one' := sorry,
-  map_mul' := sorry,
+  map_one' :=
+    begin
+      rw @fg_one _ _ Yq,
+      ext,
+      simp,
+      rw ← h_qinv₂,
+      sorry,
+    end,
+  map_mul' :=
+    begin
+      intros δ ε,
+      ext,
+      rw @fg_mul _ _ Yq _ _,
+      simp [h_qinv₁],
+      sorry,
+    end,
 }
 
 /--
@@ -313,4 +381,28 @@ Given a surjective map f : X → Y, the induced map f⋆ on fundamental groups i
 lemma surj_hom_of_surj {X Y : Type} [topological_space X] [topological_space Y]
   {Xp : pointed_space X} {Yq : pointed_space Y} (f : Cp(Xp, Yq)) :
   function.surjective f → function.surjective (induced_hom f) :=
-sorry
+begin
+  intros h_f_surj y_loop,
+  let y_loop_rep : path Yq.basepoint Yq.basepoint :=
+    classical.some (@quotient.exists_rep _ (path.homotopic.setoid Yq.basepoint Yq.basepoint) y_loop.hom),
+  let x_loop_rep : path Xp.basepoint Xp.basepoint := {
+    to_fun := λt, classical.some (h_f_surj (y_loop_rep t)),
+    continuous_to_fun := sorry,
+    source' :=
+      begin
+        simp,
+        -- classical.some_spec
+        sorry,
+      end,
+    target' :=
+      begin
+        simp,
+        -- classical.some_spec
+        sorry,
+      end,
+  },
+  let x_loop : fundamental_group Xp :=
+    sorry, --@quotient.mk _ (path.homotopic.setoid Xp.basepoint Xp.basepoint) x_loop_rep,
+  apply exists.intro x_loop,
+  sorry,
+end

@@ -40,11 +40,10 @@ begin
   by_contradiction,
   rw not_exists at h,
 
-  let r : disk → frontier disk :=
+  let r : C(disk, frontier disk) :=
     ray_fn f h,
 
   have hf_retract : retraction r := {
-    retract_continuous := ray_fn_continuous f h,
     hy_sub_x := frontier_disk_subset_disk,
     inclusion_right_inv := begin
       simp [r],
@@ -53,6 +52,6 @@ begin
     end,
   },
 
-  have hf_not_retract : ¬ retract r := no_retraction_theorem r,
+  have hf_not_retract : ¬ retraction r := no_retraction_theorem r,
   contradiction,
 end

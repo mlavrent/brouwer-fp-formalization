@@ -17,8 +17,23 @@ instance has_coe_to_fun.pointed_continuous_map {X Y : Type} [topological_space X
   has_coe_to_fun Cp(Xp, Yp) (λ _, X → Y) :=
 ⟨λf, pointed_continuous_map.to_continuous_map f⟩
 
-def pointed_map_of_continuous_map {X Y : Type} [topological_space X] [topological_space Y] [inhabited X]
-  (f : C(X, Y)) : Cp((pointed_space.mk (inhabited.default X)), (pointed_space.mk (f (inhabited.default X)))) := {
+def pointed_map_of_continuous_map {X Y : Type} [topological_space X] [topological_space Y] [inhabited X] (f : C(X, Y)) :
+  Cp((pointed_space.mk (inhabited.default X)), (pointed_space.mk (f (inhabited.default X)))) := {
   to_fun := f,
   pointed_map := by simp,
 }
+
+lemma nonempty_of_pointed_space {X : Type} [topological_space X] (Xp : pointed_space X) :
+  nonempty X :=
+begin
+  apply @nonempty_of_exists _ (λ_, true),
+  apply exists.intro Xp.basepoint,
+  tautology,
+end
+
+lemma ptd_continuous_map_is_original {X Y : Type} [topological_space X] [topological_space Y] [inhabited X] (f : C(X, Y)) :
+  (pointed_map_of_continuous_map f).to_continuous_map = f :=
+begin
+  ext,
+  simp [pointed_map_of_continuous_map],
+end
