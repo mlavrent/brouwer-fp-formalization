@@ -70,8 +70,6 @@ begin
 end
 
 
-set_option trace.simplify.rewrite true
-
 /-
 The following is a set of helper lemmas for rewriting computations on ℝ.
 -/

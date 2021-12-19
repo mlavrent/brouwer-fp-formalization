@@ -47,23 +47,18 @@ path.mk
   end
 
 def nth_winding_loop_class (n : ℤ) : circle.pointed_space.basepoint ⟶ circle.pointed_space.basepoint :=
-@quotient.mk
-  (path pt pt)
-  (path.homotopic.setoid pt pt)
-  (nth_winding_loop n)
+sorry
+-- @quotient.mk
+--   (path pt pt)
+--   (path.homotopic.setoid pt pt)
+--   (nth_winding_loop n)
 
-noncomputable lemma fg_circle_iso_int : fundamental_group circle.pointed_space ≅ ℤ :=
-category_theory.iso.mk
-  (λγ, sorry)
-  (λn, category_theory.iso.mk
-    (nth_winding_loop_class n)
-    (nth_winding_loop_class (-n))
-    begin
-      simp,
-      sorry,
-    end)
-  sorry
-  sorry
+noncomputable lemma fg_circle_iso_int : fundamental_group circle.pointed_space ≅ ℤ := {
+  hom := (λγ, sorry),
+  inv := (λn, sorry),
+  hom_inv_id' := sorry,
+  inv_hom_id' := sorry,
+}
 
 noncomputable lemma fg_disk_iso_0 : fundamental_group disk.pointed_space ≅ unit :=
 category_theory.iso.mk
@@ -93,8 +88,6 @@ instance unit.add_group : add_group unit := {
   zero_add := by cc,
   add_left_neg := by cc,
 }
-
-set_option trace.class_instances
 
 lemma no_surj_hom_π₁D₂_to_π₁S₁ (φ : (fundamental_group disk.pointed_space) →* (fundamental_group circle.pointed_space)) :
   ¬ function.surjective φ :=
